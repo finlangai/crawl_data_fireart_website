@@ -1,5 +1,5 @@
 from interactions.parse import parse_page
-from interactions.html_interactions import click_element
+from interactions.html_interactions import click_element, click_pagination
 from helpers.format_data import convert_to_safe_name, clean_first_value
 
 import pandas as pd
@@ -31,7 +31,12 @@ def convert_to_table_data(driver, time_out, limit_years, baocaotaichinh):
             break
         
         # Nếu không tìm thấy, tiếp tục click vào button pagination để chuyển sang trang tiếp theo
-        click_element(driver, "//button[@class='inline-flex items-center justify-center text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background bg-primary text-primary-foreground hover:bg-primary/90 h-7 px-2 rounded-md mr-2']", time_out)
+        clicked = click_pagination(driver, "//button[@class='inline-flex items-center justify-center text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background bg-primary text-primary-foreground hover:bg-primary/90 h-7 px-2 rounded-md mr-2']", time_out)
+        
+        # Nếu không click được (button bị disabled hoặc không tìm thấy), dừng vòng lặp
+        if not clicked:
+            print("Không thể click vào button pagination, dừng vòng lặp.")
+            break
 
     final_df = pd.concat(all_dataframes, axis=1)
     final_df = final_df.loc[:, ~final_df.columns.duplicated()]
@@ -61,4 +66,3 @@ def convert_to_table_data(driver, time_out, limit_years, baocaotaichinh):
         Baocaotaichinh[row['name']] = data_object
     
     return Baocaotaichinh
-
